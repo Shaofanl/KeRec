@@ -1,0 +1,15 @@
+# temp file 
+*.swp
+temp/
+output/
+
+# python
+**/__pycache__
+*.pyc
+*.pyo
+
+# legacy code
+legacy/
+
+# data
+dataset/

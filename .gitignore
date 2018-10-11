@@ -1,7 +1,10 @@
 # temp file 
 *.swp
 temp/
+
+# output
 output/
+notebooks/
 
 # python
 **/__pycache__

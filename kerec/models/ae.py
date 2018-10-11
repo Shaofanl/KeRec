@@ -1,6 +1,6 @@
 from .base import BaseModel 
 from keras.layers import (
-    Input, Dense
+    Input, Dense, Dropout, BatchNormalization
 )
 from keras.models import Model
 from keras import initializers, regularizers
@@ -15,7 +15,8 @@ class AutoEncoder(BaseModel):
     hparam_check_list = [
         'input_dim', 'hidden_dims', 'activation',
         'epochs', 'batch_size', 'kernel_initializer',
-        'kernel_regularizer',
+        'kernel_regularizer', 'drop_rate', 'batch_norm',
+        'input_drop_rate',
     ]
     hparam_default_dict = {
         'activation': 'sigmoid',
@@ -23,6 +24,9 @@ class AutoEncoder(BaseModel):
         'batch_size': 32,
         'kernel_initializer': initializers.random_normal(stddev=0.05),
         'kernel_regularizer': None,
+        'drop_rate': 0.0,
+        'batch_norm': False,
+        'input_drop_rate': 0.0,
     }
 
     def _build(self):
@@ -30,6 +34,9 @@ class AutoEncoder(BaseModel):
 
         # AutoEncoder 
         input_tensor = x = Input(shape=(hp.input_dim,))
+        if hp.input_drop_rate > 0:
+            x = Dropout(hp.input_drop_rate)(x)
+
         for nb_hidden in hp.hidden_dims:
             layer = Dense(
                 nb_hidden,
@@ -38,6 +45,13 @@ class AutoEncoder(BaseModel):
                 kernel_regularizer=hp.kernel_regularizer
             )
             x = layer(x)
+
+            if hp.batch_norm:
+                x = BatchNormalization()(x)
+
+            if hp.drop_rate > 0:
+                x = Dropout(hp.drop_rate)(x)
+
         output_tensor = Dense(
                 hp.input_dim,
                 kernel_initializer=hp.kernel_initializer,
@@ -99,8 +113,4 @@ def nonzero_batch_rmse(y_true, y_pred):
     """RMSE that ignores zero values and averages over a batch, assuming
     that there is at least one nonzero value per batch.
     """
-    mask = K.cast(K.not_equal(y_true, 0), K.floatx())
-    count = K.sum(mask)
-    se = K.sum(K.square(y_true-y_pred)*mask)
-    rmse = K.sqrt(se / count)
-    return rmse
+    return K.sqrt(nonzero_batch_mse(y_true, y_pred))

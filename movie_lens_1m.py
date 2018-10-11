@@ -28,12 +28,24 @@ if __name__ == '__main__':
     # setup hyperparameters
     hparam = HyperParameterSet(
         input_dim = 3953,
-        hidden_dims = [128, 64, 128],
-        epochs=2000,
+        hidden_dims = [128, 128],
+        epochs=500,
         batch_size=16,
+
+        # regularization
         # kernel_regularizer=None,
         kernel_regularizer=regularizers.l2(0.00005),
         # kernel_regularizer=regularizers.l1(0.00001), # 0.9771
+
+        # dropout
+        drop_rate=0.3,
+
+        # activation
+        # activation='sigmoid', batch_norm=True,
+        activation='relu', batch_norm=True,
+
+        # drop input
+        input_drop_rate = 0.3,
     )
 
     # build model
@@ -48,5 +60,13 @@ if __name__ == '__main__':
     model.fit(
         train_set=train_set,
         valid_set=test_set,
-        callbacks=[callbacks.TensorBoard('./output/movie_lens_1m/layer/128_64_128')]
+        callbacks=[callbacks.TensorBoard('./output/movie_lens_1m/final')]
     )
+    model.save('./output/movie_lens_1m/models/', overwrite=True)
+
+    # inference
+    # model.load_weights('./output/movie_lens_1m/models/model.h5')    
+#   sample = test_set[:1]
+#   prediction = model.predict(sample)
+#   print(sample)
+#   print(prediction)

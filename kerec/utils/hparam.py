@@ -1,3 +1,6 @@
+import json
+
+
 class HyperParameterSet(dict):
     def __getattr__(self, name):
         if name in self:
@@ -17,3 +20,20 @@ class HyperParameterSet(dict):
                     self[param_name] = default_dict[param_name]
                 else:
                     raise AttributeError("Hyper-parameters `{}` is required but not provided".format(param_name))
+
+    def serialize(self):
+        return json.dumps(self)
+
+    def save(self, filename):
+        raise NotImplementedError
+        # TODO: object cannot be serialized to string
+        # with open(filename, 'w') as f:
+        #     f.write(self.serialize())
+
+
+    def deserialize(self, ser):
+        raise NotImplementedError
+
+    def load(self, filename):
+        raise NotImplementedError
+

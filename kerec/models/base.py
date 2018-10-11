@@ -1,3 +1,4 @@
+import os
 from abc import ABC, abstractmethod
 
 
@@ -55,15 +56,30 @@ class BaseModel(ABC):
         """
         raise NotImplementedError
 
-    def load(self, path, model_name):
+    @staticmethod
+    def load(save_dir):
         """Retrive a model and its optimizer/hyper-parameters from files 
         """
         raise NotImplementedError
 
-    def save(self, path, model_name):
+    def load_weights(self, filepath):
+        """Retrive the weights from a file
+        """
+        self.model.load_weights(filepath)
+
+    def save(self, save_dir, overwrite=True):
         """Save a model and its optimizer/hyper-parameters to files 
         """
-        raise NotImplementedError
+        # raise NotImplementedError
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+        else:
+            if not overwrite:
+                raise Exception(save_dir+" exists! Please set `overwrite=True` to overwrite the model") 
+        self.model.save(os.path.join(save_dir,'model.h5'))
+        # TODO: save object to file
+        # self.hparam.save(os.path.join(save_dir,'hparams.json'))
+        # TODO: save optimizer to the file
 
     # check hparam
     def _check_hparam(self):
